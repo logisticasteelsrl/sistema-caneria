@@ -1,0 +1,1294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistema Control Cañería - Heaven Sync</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2c5282;
+            --accent: #3182ce;
+            --success: #38a169;
+            --warning: #ed8936;
+            --danger: #e53e3e;
+            --text: #ffffff;
+            --text-muted: #a0aec0;
+            --border: #4a5568;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sync-status {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--success);
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .view-tabs {
+            display: flex;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 8px;
+            gap: 8px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 73px;
+            z-index: 99;
+            backdrop-filter: blur(10px);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .tab-btn.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .tab-btn:active {
+            transform: scale(0.95);
+        }
+
+        .view-container {
+            display: none;
+            padding: 16px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .view-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .location-selector {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .location-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .location-display {
+            font-size: 36px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .location-nav {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        .nav-btn {
+            padding: 12px;
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
+            background: var(--accent);
+        }
+
+        .camera-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 75%;
+            background: #000;
+        }
+
+        #camera-feed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #camera-canvas {
+            display: none;
+        }
+
+        .camera-placeholder {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--secondary);
+            color: var(--text-muted);
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 30%, transparent 70%, rgba(0,0,0,0.5) 100%);
+        }
+
+        .camera-guide {
+            background: rgba(49, 130, 206, 0.2);
+            border: 2px dashed var(--accent);
+            border-radius: 8px;
+            margin: auto;
+            width: 80%;
+            height: 60%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--accent);
+            font-size: 13px;
+            text-align: center;
+            padding: 16px;
+        }
+
+        .capture-btn {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 72px;
+            height: 72px;
+            background: white;
+            border: 4px solid var(--accent);
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
+        }
+
+        .capture-btn:active {
+            transform: translateX(-50%) scale(0.9);
+        }
+
+        .capture-btn-inner {
+            width: 56px;
+            height: 56px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .camera-trigger {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--accent) 0%, #2c5282 100%);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+            transition: all 0.2s ease;
+            margin-bottom: 16px;
+        }
+
+        .camera-trigger:active {
+            transform: scale(0.97);
+        }
+
+        .camera-trigger.analyzing {
+            background: linear-gradient(135deg, var(--warning) 0%, #dd6b20 100%);
+            animation: pulse-btn 1.5s infinite;
+        }
+
+        @keyframes pulse-btn {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .analysis-result {
+            padding: 20px;
+            background: rgba(56, 161, 105, 0.1);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            display: none;
+            animation: slideUp 0.3s ease;
+        }
+
+        .analysis-result.show {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            font-size: 13px;
+            color: var(--success);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-count {
+            font-size: 48px;
+            font-weight: 700;
+            color: var(--text);
+            text-align: center;
+            margin: 16px 0;
+        }
+
+        .result-product {
+            font-size: 15px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .manual-adjust {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 16px 0;
+        }
+
+        .adjust-btn {
+            width: 44px;
+            height: 44px;
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .adjust-btn:active {
+            transform: scale(0.9);
+            background: var(--accent);
+        }
+
+        .adjust-input {
+            width: 90px;
+            padding: 10px;
+            background: var(--secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .action-btn {
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .btn-confirm {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-retry {
+            background: var(--secondary);
+            color: var(--text);
+            border: 2px solid var(--border);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            display: none;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .map-header {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .map-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .stat-box {
+            background: var(--secondary);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-value.good { color: var(--success); }
+        .stat-value.warning { color: var(--warning); }
+        .stat-value.danger { color: var(--danger); }
+
+        .map-legend {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            font-size: 11px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .legend-box {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            border: 2px solid;
+        }
+
+        .rack-wrapper {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            overflow-x: auto;
+        }
+
+        .rack-grid {
+            display: grid;
+            grid-template-columns: repeat(21, 40px);
+            grid-template-rows: repeat(5, 50px);
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .rack-cell {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .rack-cell:active {
+            transform: scale(1.05);
+        }
+
+        .rack-cell.occupied {
+            background: rgba(56, 161, 105, 0.15);
+            border-color: var(--success);
+        }
+
+        .rack-cell.low-stock {
+            background: rgba(237, 137, 54, 0.15);
+            border-color: var(--warning);
+        }
+
+        .rack-cell.discrepancy {
+            background: rgba(229, 62, 62, 0.15);
+            border-color: var(--danger);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .rack-cell.selected {
+            background: rgba(49, 130, 206, 0.3);
+            border-color: var(--accent);
+            border-width: 3px;
+        }
+
+        .cell-id {
+            font-size: 9px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .cell-qty {
+            font-size: 8px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .quick-action-btn {
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .quick-action-btn:active {
+            transform: scale(0.95);
+            border-color: var(--accent);
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        .action-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+
+        .action-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .activity-log {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .activity-log h3 {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .activity-item {
+            background: var(--secondary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--accent);
+        }
+
+        .activity-code {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .activity-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .activity-time {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            padding: 8px;
+            gap: 4px;
+            z-index: 100;
+        }
+
+        .bottom-nav-btn {
+            padding: 10px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .bottom-nav-btn.active {
+            color: var(--accent);
+            background: rgba(49, 130, 206, 0.1);
+        }
+
+        .bottom-nav-btn:active {
+            transform: scale(0.95);
+        }
+
+        .bottom-nav-icon {
+            font-size: 22px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: none;
+            z-index: 1000;
+            animation: toastIn 0.3s ease;
+            max-width: 90%;
+        }
+
+        .toast.show {
+            display: block;
+        }
+
+        @keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>
+            <span>🏭</span>
+            Control Cañería
+            <span class="sync-status">✓ Heaven</span>
+        </h1>
+        <p>21 columnas × 5 niveles = 105 posiciones</p>
+    </div>
+
+    <div class="view-tabs">
+        <button class="tab-btn active" onclick="switchView('camera')">
+            <span>📸</span> Cámara
+        </button>
+        <button class="tab-btn" onclick="switchView('map')">
+            <span>🗺️</span> Mapa
+        </button>
+        <button class="tab-btn" onclick="switchView('movements')">
+            <span>📋</span> Movimientos
+        </button>
+    </div>
+
+    <div class="view-container active" id="view-camera">
+        <div class="location-selector">
+            <div class="location-label">Posición Actual</div>
+            <div class="location-display" id="currentLocation">N3-15</div>
+            <div class="location-nav">
+                <button class="nav-btn" onclick="changeLevel(-1)">⬆️ Nivel</button>
+                <button class="nav-btn" onclick="changePosition(-1)">⬅️ Col</button>
+                <button class="nav-btn" onclick="changePosition(1)">Col ➡️</button>
+                <button class="nav-btn" onclick="changeLevel(1)">⬇️ Nivel</button>
+                <button class="nav-btn" onclick="resetLocation()">🎯 Reset</button>
+                <button class="nav-btn" onclick="goToMap()">🗺️ Mapa</button>
+            </div>
+        </div>
+
+        <div class="camera-section">
+            <div class="camera-container">
+                <div class="camera-placeholder" id="cameraPlaceholder">
+                    <div style="font-size: 64px; margin-bottom: 12px;">📸</div>
+                    <div>Toca el botón para activar</div>
+                </div>
+                <video id="camera-feed" class="hidden" autoplay playsinline></video>
+                <canvas id="camera-canvas"></canvas>
+                <div class="camera-overlay hidden" id="cameraOverlay">
+                    <div></div>
+                    <div class="camera-guide">
+                        Centra los caños<br>en el recuadro
+                    </div>
+                    <button class="capture-btn" onclick="capturePhoto()">
+                        <div class="capture-btn-inner"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <button class="camera-trigger" id="cameraTrigger" onclick="toggleCamera()">
+            <span style="font-size: 24px;">📸</span>
+            <span id="cameraTriggerText">Activar Cámara</span>
+        </button>
+
+        <div class="loading" id="loadingState">
+            <div class="loading-spinner"></div>
+            <div>Analizando con IA...</div>
+            <div style="font-size: 11px; margin-top: 6px;">Esto puede tomar unos segundos</div>
+        </div>
+
+        <div class="analysis-result" id="analysisResult">
+            <div class="result-header">✅ Conteo Completado</div>
+            <div class="result-count" id="resultCount">42</div>
+            <div class="result-product" id="resultProduct">Caños 100x100x3mm</div>
+            
+            <div style="text-align: center; margin: 12px 0; color: var(--text-muted); font-size: 11px;">
+                Ajustar cantidad:
+            </div>
+            
+            <div class="manual-adjust">
+                <button class="adjust-btn" onclick="adjustCount(-5)">-5</button>
+                <button class="adjust-btn" onclick="adjustCount(-1)">-</button>
+                <input type="number" class="adjust-input" id="manualCount" value="42" min="0">
+                <button class="adjust-btn" onclick="adjustCount(1)">+</button>
+                <button class="adjust-btn" onclick="adjustCount(5)">+5</button>
+            </div>
+
+            <div class="action-buttons">
+                <button class="action-btn btn-retry" onclick="retryCapture()">
+                    🔄 Repetir
+                </button>
+                <button class="action-btn btn-confirm" onclick="confirmCount()">
+                    ✅ Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="view-container" id="view-map">
+        <div class="map-header">
+            <div class="map-stats">
+                <div class="stat-box">
+                    <div class="stat-label">Ocupación</div>
+                    <div class="stat-value good" id="statOccupancy">68%</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Posiciones</div>
+                    <div class="stat-value" id="statPositions">72/105</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Discrepancias</div>
+                    <div class="stat-value warning" id="statDiscrepancies">3</div>
+                </div>
+            </div>
+            <div class="map-legend">
+                <div class="legend-item">
+                    <div class="legend-box" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success);"></div>
+                    <span>Ocupado</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: rgba(255, 255, 255, 0.03); border-color: var(--border);"></div>
+                    <span>Vacío</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: rgba(237, 137, 54, 0.15); border-color: var(--warning);"></div>
+                    <span>Bajo</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-box" style="background: rgba(229, 62, 62, 0.15); border-color: var(--danger);"></div>
+                    <span>Discrepancia</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="rack-wrapper">
+            <div class="rack-grid" id="rackGrid"></div>
+        </div>
+    </div>
+
+    <div class="view-container" id="view-movements">
+        <div class="quick-actions">
+            <div class="quick-action-btn" onclick="simulateCount()">
+                <div class="action-icon">🔢</div>
+                <div class="action-label">Conteo Manual</div>
+            </div>
+            <div class="quick-action-btn" onclick="showToast('Función Salida - Próximamente')">
+                <div class="action-icon">📤</div>
+                <div class="action-label">Salida</div>
+            </div>
+            <div class="quick-action-btn" onclick="showToast('Función Traslado - Próximamente')">
+                <div class="action-icon">🔄</div>
+                <div class="action-label">Traslado</div>
+            </div>
+            <div class="quick-action-btn" onclick="exportData()">
+                <div class="action-icon">📊</div>
+                <div class="action-label">Exportar</div>
+            </div>
+        </div>
+
+        <div class="activity-log">
+            <h3>Actividad Reciente</h3>
+            <div id="activityLog"></div>
+        </div>
+    </div>
+
+    <div class="bottom-nav">
+        <button class="bottom-nav-btn active" onclick="switchView('camera')">
+            <span class="bottom-nav-icon">📸</span>
+            <span>Cámara</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="switchView('map')">
+            <span class="bottom-nav-icon">🗺️</span>
+            <span>Mapa</span>
+        </button>
+        <button class="bottom-nav-btn" onclick="switchView('movements')">
+            <span class="bottom-nav-icon">📋</span>
+            <span>Historial</span>
+        </button>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentLevel = 3;
+        let currentPosition = 15;
+        let cameraActive = false;
+        let stream = null;
+        let rackData = [];
+        
+        function initializeRack() {
+            for (let row = 0; row < 5; row++) {
+                for (let col = 0; col < 21; col++) {
+                    const level = 5 - row;
+                    const position = col + 1;
+                    const id = `N${level}-${String(position).padStart(2, '0')}`;
+                    
+                    const isOccupied = Math.random() > 0.32;
+                    const hasDiscrepancy = isOccupied && Math.random() > 0.97;
+                    const isLowStock = isOccupied && !hasDiscrepancy && Math.random() > 0.92;
+                    
+                    rackData.push({
+                        id: id,
+                        level: level,
+                        position: position,
+                        occupied: isOccupied,
+                        quantity: isOccupied ? Math.floor(Math.random() * 50) + 10 : 0,
+                        hasDiscrepancy: hasDiscrepancy,
+                        isLowStock: isLowStock
+                    });
+                }
+            }
+            renderRack();
+        }
+
+        function renderRack() {
+            const grid = document.getElementById('rackGrid');
+            grid.innerHTML = '';
+            
+            rackData.forEach(cell => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'rack-cell';
+                
+                if (cell.occupied) cellDiv.classList.add('occupied');
+                if (cell.hasDiscrepancy) cellDiv.classList.add('discrepancy');
+                if (cell.isLowStock) cellDiv.classList.add('low-stock');
+                
+                if (cell.id === `N${currentLevel}-${String(currentPosition).padStart(2, '0')}`) {
+                    cellDiv.classList.add('selected');
+                }
+                
+                cellDiv.innerHTML = `
+                    <div class="cell-id">${cell.id}</div>
+                    ${cell.occupied ? `<div class="cell-qty">${cell.quantity}un</div>` : ''}
+                `;
+                
+                cellDiv.onclick = () => selectCellFromMap(cell);
+                grid.appendChild(cellDiv);
+            });
+        }
+
+        function selectCellFromMap(cell) {
+            const parts = cell.id.split('-');
+            currentLevel = parseInt(parts[0].substring(1));
+            currentPosition = parseInt(parts[1]);
+            updateLocation();
+            renderRack();
+            switchView('camera');
+            showToast(`Seleccionado: ${cell.id}`);
+        }
+
+        function updateStats() {
+            const occupied = rackData.filter(c => c.occupied).length;
+            const discrepancies = rackData.filter(c => c.hasDiscrepancy).length;
+            
+            document.getElementById('statOccupancy').textContent = Math.round((occupied / 105) * 100) + '%';
+            document.getElementById('statPositions').textContent = `${occupied}/105`;
+            document.getElementById('statDiscrepancies').textContent = discrepancies;
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(`view-${viewName}`).classList.add('active');
+            document.querySelector(`.tab-btn[onclick*="${viewName}"]`).classList.add('active');
+            document.querySelector(`.bottom-nav-btn[onclick*="${viewName}"]`).classList.add('active');
+            
+            if (viewName === 'map') {
+                renderRack();
+            }
+        }
+
+        function goToMap() {
+            switchView('map');
+        }
+
+        function updateLocation() {
+            document.getElementById('currentLocation').textContent = 
+                `N${currentLevel}-${String(currentPosition).padStart(2, '0')}`;
+        }
+
+        function changeLevel(delta) {
+            currentLevel = Math.max(1, Math.min(5, currentLevel + delta));
+            updateLocation();
+            renderRack();
+            showToast(`Nivel ${currentLevel}`);
+        }
+
+        function changePosition(delta) {
+            currentPosition = Math.max(1, Math.min(21, currentPosition + delta));
+            updateLocation();
+            renderRack();
+            showToast(`Columna ${currentPosition}`);
+        }
+
+        function resetLocation() {
+            currentLevel = 3;
+            currentPosition = 15;
+            updateLocation();
+            renderRack();
+            showToast('N3-15 (centro)');
+        }
+
+        async function toggleCamera() {
+            const video = document.getElementById('camera-feed');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const overlay = document.getElementById('cameraOverlay');
+            const trigger = document.getElementById('cameraTrigger');
+            const triggerText = document.getElementById('cameraTriggerText');
+
+            if (!cameraActive) {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            facingMode: 'environment',
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 }
+                        } 
+                    });
+                    
+                    video.srcObject = stream;
+                    video.classList.remove('hidden');
+                    placeholder.classList.add('hidden');
+                    overlay.classList.remove('hidden');
+                    
+                    cameraActive = true;
+                    trigger.classList.add('analyzing');
+                    triggerText.textContent = 'Cámara Activa';
+                    
+                    showToast('✅ Cámara lista');
+                } catch (error) {
+                    showToast('❌ Error: Permita acceso a cámara');
+                    console.error(error);
+                }
+            } else {
+                stopCamera();
+            }
+        }
+
+        function stopCamera() {
+            const video = document.getElementById('camera-feed');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const overlay = document.getElementById('cameraOverlay');
+            const trigger = document.getElementById('cameraTrigger');
+            const triggerText = document.getElementById('cameraTriggerText');
+
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            video.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            overlay.classList.add('hidden');
+            
+            cameraActive = false;
+            trigger.classList.remove('analyzing');
+            triggerText.textContent = 'Activar Cámara';
+        }
+
+        async function capturePhoto() {
+            const video = document.getElementById('camera-feed');
+            const canvas = document.getElementById('camera-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            const imageData = canvas.toDataURL('image/jpeg', 0.8);
+            
+            stopCamera();
+            document.getElementById('loadingState').classList.add('show');
+            
+            await analyzeImage(imageData);
+        }
+
+        async function analyzeImage(imageData) {
+            try {
+                const response = await fetch('https://api.anthropic.com/v1/messages', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        model: 'claude-sonnet-4-20250514',
+                        max_tokens: 1000,
+                        messages: [{
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'image',
+                                    source: {
+                                        type: 'base64',
+                                        media_type: 'image/jpeg',
+                                        data: imageData.split(',')[1]
+                                    }
+                                },
+                                {
+                                    type: 'text',
+                                    text: `Analiza esta imagen de caños estructurales apilados.
+
+Responde SOLO con JSON válido (sin markdown, sin texto extra):
+{"count": número, "type": "medida", "confidence": porcentaje}
+
+Cuenta los caños visibles y estima la medida si es posible.`
+                                }
+                            ]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const textResponse = data.content.find(c => c.type === 'text')?.text || '{}';
+                const cleanResponse = textResponse.replace(/```json|```/g, '').trim();
+                const result = JSON.parse(cleanResponse);
+                
+                displayResult(result);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                displayResult({
+                    count: Math.floor(Math.random() * 40) + 20,
+                    type: '100x100x3mm',
+                    confidence: 85
+                });
+                showToast('⚠️ Modo demo (error API)');
+            }
+            
+            document.getElementById('loadingState').classList.remove('show');
+        }
+
+        function displayResult(result) {
+            document.getElementById('resultCount').textContent = result.count;
+            document.getElementById('resultProduct').textContent = `Caños ${result.type}`;
+            document.getElementById('manualCount').value = result.count;
+            document.getElementById('analysisResult').classList.add('show');
+        }
+
+        function adjustCount(delta) {
+            const input = document.getElementById('manualCount');
+            const newValue = Math.max(0, parseInt(input.value) + delta);
+            input.value = newValue;
+            document.getElementById('resultCount').textContent = newValue;
+        }
+
+        function retryCapture() {
+            document.getElementById('analysisResult').classList.remove('show');
+            toggleCamera();
+        }
+
+        function confirmCount() {
+            const count = document.getElementById('manualCount').value;
+            const location = document.getElementById('currentLocation').textContent;
+            
+            const cell = rackData.find(c => c.id === location);
+            if (cell) {
+                cell.quantity = parseInt(count);
+                cell.occupied = count > 0;
+            }
+            
+            showToast(`✅ ${count} unidades en ${location}`);
+            addActivity(`Conteo: ${count} unidades en ${location}`);
+            updateStats();
+            
+            setTimeout(() => {
+                document.getElementById('analysisResult').classList.remove('show');
+                changePosition(1);
+            }, 1500);
+        }
+
+        function simulateCount() {
+            const count = prompt('Ingrese cantidad de caños contados manualmente:');
+            if (count && !isNaN(count) && count > 0) {
+                displayResult({
+                    count: parseInt(count),
+                    type: '100x100x3mm (manual)',
+                    confidence: 100
+                });
+                switchView('camera');
+            }
+        }
+
+        function exportData() {
+            let csv = 'Ubicación,Cantidad,Estado\n';
+            rackData.forEach(cell => {
+                if (cell.occupied) {
+                    csv += `${cell.id},${cell.quantity},${cell.hasDiscrepancy ? 'Discrepancia' : 'OK'}\n`;
+                }
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `inventario-caneria-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            
+            showToast('✅ Exportado a CSV');
+        }
+
+        function loadActivity() {
+            const activities = [
+                { code: 'C-001-100X100', desc: 'Entrada en N3-15', time: 'Hace 5 min' },
+                { code: 'C-002-80X80', desc: 'Salida desde N2-07', time: 'Hace 18 min' },
+                { code: 'C-003-120X80', desc: 'Conteo con cámara N4-12', time: 'Hace 35 min' },
+                { code: 'C-004-150X150', desc: 'Ajuste en N5-03', time: 'Hace 1h' }
+            ];
+            
+            const log = document.getElementById('activityLog');
+            log.innerHTML = activities.map(act => `
+                <div class="activity-item">
+                    <div class="activity-code">${act.code}</div>
+                    <div class="activity-desc">${act.desc}</div>
+                    <div class="activity-time">${act.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function addActivity(desc) {
+            const log = document.getElementById('activityLog');
+            const item = document.createElement('div');
+            item.className = 'activity-item';
+            item.innerHTML = `
+                <div class="activity-code">CONTEO-${Date.now()}</div>
+                <div class="activity-desc">${desc}</div>
+                <div class="activity-time">Justo ahora</div>
+            `;
+            log.insertBefore(item, log.firstChild);
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        window.onload = function() {
+            initializeRack();
+            loadActivity();
+            updateLocation();
+            updateStats();
+        };
+    </script>
+</body>
+</html>
