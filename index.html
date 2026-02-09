@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sistema Control Cañería - Heaven Sync</title>
+    <title>Sistema Control Cañería - Piloto</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * {
@@ -23,6 +23,10 @@
             --text: #ffffff;
             --text-muted: #a0aec0;
             --border: #4a5568;
+            --white: #f0f0f0;
+            --yellow: #ffd700;
+            --red: #ff6b6b;
+            --blue: #4dabf7;
         }
 
         body {
@@ -51,10 +55,10 @@
             gap: 8px;
         }
 
-        .sync-status {
+        .pilot-badge {
             display: inline-block;
             padding: 4px 12px;
-            background: var(--success);
+            background: var(--warning);
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
@@ -136,17 +140,45 @@
         }
 
         .location-display {
-            font-size: 36px;
+            font-size: 32px;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
             color: var(--accent);
             text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
+
+        .product-info {
+            background: var(--secondary);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .product-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .product-color {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .color-white { background: var(--white); color: #000; }
+        .color-yellow { background: var(--yellow); color: #000; }
+        .color-red { background: var(--red); color: white; }
+        .color-blue { background: var(--blue); color: white; }
 
         .location-nav {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
         }
 
@@ -455,41 +487,21 @@
             border: 1px solid var(--border);
         }
 
-        .map-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-
-        .stat-box {
-            background: var(--secondary);
+        .pilot-notice {
+            background: rgba(237, 137, 54, 0.2);
+            border: 1px solid var(--warning);
             padding: 12px;
             border-radius: 8px;
-            text-align: center;
+            margin-bottom: 12px;
+            font-size: 13px;
         }
-
-        .stat-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .stat-value.good { color: var(--success); }
-        .stat-value.warning { color: var(--warning); }
-        .stat-value.danger { color: var(--danger); }
 
         .map-legend {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
             font-size: 11px;
+            margin-top: 12px;
         }
 
         .legend-item {
@@ -509,53 +521,32 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
             padding: 16px;
-            overflow-x: auto;
         }
 
         .rack-grid {
             display: grid;
-            grid-template-columns: repeat(21, 40px);
-            grid-template-rows: repeat(5, 50px);
-            gap: 4px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
             margin-top: 12px;
         }
 
         .rack-cell {
             background: rgba(255, 255, 255, 0.03);
             border: 2px solid var(--border);
-            border-radius: 6px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            border-radius: 8px;
+            padding: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
         }
 
         .rack-cell:active {
-            transform: scale(1.05);
+            transform: scale(0.98);
         }
 
         .rack-cell.occupied {
             background: rgba(56, 161, 105, 0.15);
             border-color: var(--success);
-        }
-
-        .rack-cell.low-stock {
-            background: rgba(237, 137, 54, 0.15);
-            border-color: var(--warning);
-        }
-
-        .rack-cell.discrepancy {
-            background: rgba(229, 62, 62, 0.15);
-            border-color: var(--danger);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
         }
 
         .rack-cell.selected {
@@ -565,49 +556,22 @@
         }
 
         .cell-id {
-            font-size: 9px;
+            font-size: 16px;
             font-weight: 700;
             font-family: 'JetBrains Mono', monospace;
+            margin-bottom: 4px;
+        }
+
+        .cell-product {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 4px;
         }
 
         .cell-qty {
-            font-size: 8px;
-            color: var(--text-muted);
-            margin-top: 2px;
-        }
-
-        .quick-actions {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .quick-action-btn {
-            padding: 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-        }
-
-        .quick-action-btn:active {
-            transform: scale(0.95);
-            border-color: var(--accent);
-            background: rgba(49, 130, 206, 0.1);
-        }
-
-        .action-icon {
-            font-size: 32px;
-            margin-bottom: 8px;
-        }
-
-        .action-label {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
-            color: var(--text);
+            color: var(--success);
         }
 
         .activity-log {
@@ -746,6 +710,18 @@
             background: var(--accent);
             border-radius: 3px;
         }
+
+        .export-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--success);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 16px;
+        }
     </style>
 </head>
 <body>
@@ -753,9 +729,9 @@
         <h1>
             <span>🏭</span>
             Control Cañería
-            <span class="sync-status">✓ Heaven</span>
+            <span class="pilot-badge">PILOTO</span>
         </h1>
-        <p>21 columnas × 5 niveles = 105 posiciones</p>
+        <p>10 posiciones de prueba</p>
     </div>
 
     <div class="view-tabs">
@@ -765,22 +741,26 @@
         <button class="tab-btn" onclick="switchView('map')">
             <span>🗺️</span> Mapa
         </button>
-        <button class="tab-btn" onclick="switchView('movements')">
-            <span>📋</span> Movimientos
+        <button class="tab-btn" onclick="switchView('export')">
+            <span>📊</span> Exportar
         </button>
     </div>
 
     <div class="view-container active" id="view-camera">
         <div class="location-selector">
             <div class="location-label">Posición Actual</div>
-            <div class="location-display" id="currentLocation">N3-15</div>
+            <div class="location-display" id="currentLocation">P-01</div>
+            
+            <div class="product-info" id="productInfo">
+                <div class="product-name" id="productName">Caño 30x70x2mm</div>
+                <div class="product-color color-red" id="productColor">🔴 Rojo - 2mm</div>
+            </div>
+
             <div class="location-nav">
-                <button class="nav-btn" onclick="changeLevel(-1)">⬆️ Nivel</button>
-                <button class="nav-btn" onclick="changePosition(-1)">⬅️ Col</button>
-                <button class="nav-btn" onclick="changePosition(1)">Col ➡️</button>
-                <button class="nav-btn" onclick="changeLevel(1)">⬇️ Nivel</button>
-                <button class="nav-btn" onclick="resetLocation()">🎯 Reset</button>
-                <button class="nav-btn" onclick="goToMap()">🗺️ Mapa</button>
+                <button class="nav-btn" onclick="changePosition(-1)">⬅️ Anterior</button>
+                <button class="nav-btn" onclick="changePosition(1)">Siguiente ➡️</button>
+                <button class="nav-btn" onclick="resetLocation()">🎯 Primera</button>
+                <button class="nav-btn" onclick="goToMap()">🗺️ Ver Mapa</button>
             </div>
         </div>
 
@@ -795,7 +775,7 @@
                 <div class="camera-overlay hidden" id="cameraOverlay">
                     <div></div>
                     <div class="camera-guide">
-                        Centra los caños<br>en el recuadro
+                        Centra los caños<br>apilados horizontalmente
                     </div>
                     <button class="capture-btn" onclick="capturePhoto()">
                         <div class="capture-btn-inner"></div>
@@ -811,17 +791,17 @@
 
         <div class="loading" id="loadingState">
             <div class="loading-spinner"></div>
-            <div>Analizando con IA...</div>
-            <div style="font-size: 11px; margin-top: 6px;">Esto puede tomar unos segundos</div>
+            <div>Contando caños con IA...</div>
+            <div style="font-size: 11px; margin-top: 6px;">Esto puede tomar 10-15 segundos</div>
         </div>
 
         <div class="analysis-result" id="analysisResult">
             <div class="result-header">✅ Conteo Completado</div>
             <div class="result-count" id="resultCount">42</div>
-            <div class="result-product" id="resultProduct">Caños 100x100x3mm</div>
+            <div class="result-product" id="resultProduct">Caños detectados</div>
             
             <div style="text-align: center; margin: 12px 0; color: var(--text-muted); font-size: 11px;">
-                Ajustar cantidad:
+                Ajustar cantidad si es necesario:
             </div>
             
             <div class="manual-adjust">
@@ -845,36 +825,26 @@
 
     <div class="view-container" id="view-map">
         <div class="map-header">
-            <div class="map-stats">
-                <div class="stat-box">
-                    <div class="stat-label">Ocupación</div>
-                    <div class="stat-value good" id="statOccupancy">68%</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Posiciones</div>
-                    <div class="stat-value" id="statPositions">72/105</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-label">Discrepancias</div>
-                    <div class="stat-value warning" id="statDiscrepancies">3</div>
-                </div>
+            <div class="pilot-notice">
+                🚀 <strong>MODO PILOTO:</strong> Mostrando solo 10 posiciones de prueba
             </div>
+            
             <div class="map-legend">
                 <div class="legend-item">
-                    <div class="legend-box" style="background: rgba(56, 161, 105, 0.15); border-color: var(--success);"></div>
-                    <span>Ocupado</span>
+                    <div class="legend-box" style="background: var(--white); border-color: var(--white);"></div>
+                    <span>Blanco 1.2mm</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-box" style="background: rgba(255, 255, 255, 0.03); border-color: var(--border);"></div>
-                    <span>Vacío</span>
+                    <div class="legend-box" style="background: var(--yellow); border-color: var(--yellow);"></div>
+                    <span>Amarillo 1.6mm</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-box" style="background: rgba(237, 137, 54, 0.15); border-color: var(--warning);"></div>
-                    <span>Bajo</span>
+                    <div class="legend-box" style="background: var(--red); border-color: var(--red);"></div>
+                    <span>Rojo 2mm</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-box" style="background: rgba(229, 62, 62, 0.15); border-color: var(--danger);"></div>
-                    <span>Discrepancia</span>
+                    <div class="legend-box" style="background: var(--blue); border-color: var(--blue);"></div>
+                    <span>Azul 3.2mm</span>
                 </div>
             </div>
         </div>
@@ -884,30 +854,14 @@
         </div>
     </div>
 
-    <div class="view-container" id="view-movements">
-        <div class="quick-actions">
-            <div class="quick-action-btn" onclick="simulateCount()">
-                <div class="action-icon">🔢</div>
-                <div class="action-label">Conteo Manual</div>
-            </div>
-            <div class="quick-action-btn" onclick="showToast('Función Salida - Próximamente')">
-                <div class="action-icon">📤</div>
-                <div class="action-label">Salida</div>
-            </div>
-            <div class="quick-action-btn" onclick="showToast('Función Traslado - Próximamente')">
-                <div class="action-icon">🔄</div>
-                <div class="action-label">Traslado</div>
-            </div>
-            <div class="quick-action-btn" onclick="exportData()">
-                <div class="action-icon">📊</div>
-                <div class="action-label">Exportar</div>
-            </div>
-        </div>
-
+    <div class="view-container" id="view-export">
         <div class="activity-log">
-            <h3>Actividad Reciente</h3>
+            <h3>📋 Registro de Conteos</h3>
             <div id="activityLog"></div>
         </div>
+        <button class="export-btn" onclick="exportData()">
+            📊 Exportar a CSV
+        </button>
     </div>
 
     <div class="bottom-nav">
@@ -919,89 +873,99 @@
             <span class="bottom-nav-icon">🗺️</span>
             <span>Mapa</span>
         </button>
-        <button class="bottom-nav-btn" onclick="switchView('movements')">
-            <span class="bottom-nav-icon">📋</span>
-            <span>Historial</span>
+        <button class="bottom-nav-btn" onclick="switchView('export')">
+            <span class="bottom-nav-icon">📊</span>
+            <span>Exportar</span>
         </button>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
-        let currentLevel = 3;
-        let currentPosition = 15;
+        const pilotProducts = [
+            { id: 'P-01', name: '30x70x2mm', thickness: 2, color: 'red', colorName: 'Rojo' },
+            { id: 'P-02', name: '30x60x2mm', thickness: 2, color: 'red', colorName: 'Rojo' },
+            { id: 'P-03', name: '60x60x2mm', thickness: 2, color: 'red', colorName: 'Rojo' },
+            { id: 'P-04', name: '45x45x1.6mm', thickness: 1.6, color: 'yellow', colorName: 'Amarillo' },
+            { id: 'P-05', name: '30x70x1.2mm', thickness: 1.2, color: 'white', colorName: 'Blanco' },
+            { id: 'P-06', name: '50x70x1.6mm', thickness: 1.6, color: 'yellow', colorName: 'Amarillo' },
+            { id: 'P-07', name: '20x50x1.6mm', thickness: 1.6, color: 'yellow', colorName: 'Amarillo' },
+            { id: 'P-08', name: '20x50x2mm', thickness: 2, color: 'red', colorName: 'Rojo' },
+            { id: 'P-09', name: '30x50x3.2mm', thickness: 3.2, color: 'blue', colorName: 'Azul' },
+            { id: 'P-10', name: '60x60x3.2mm', thickness: 3.2, color: 'blue', colorName: 'Azul' }
+        ];
+
+        let currentPosition = 0;
         let cameraActive = false;
         let stream = null;
-        let rackData = [];
-        
-        function initializeRack() {
-            for (let row = 0; row < 5; row++) {
-                for (let col = 0; col < 21; col++) {
-                    const level = 5 - row;
-                    const position = col + 1;
-                    const id = `N${level}-${String(position).padStart(2, '0')}`;
-                    
-                    const isOccupied = Math.random() > 0.32;
-                    const hasDiscrepancy = isOccupied && Math.random() > 0.97;
-                    const isLowStock = isOccupied && !hasDiscrepancy && Math.random() > 0.92;
-                    
-                    rackData.push({
-                        id: id,
-                        level: level,
-                        position: position,
-                        occupied: isOccupied,
-                        quantity: isOccupied ? Math.floor(Math.random() * 50) + 10 : 0,
-                        hasDiscrepancy: hasDiscrepancy,
-                        isLowStock: isLowStock
-                    });
-                }
-            }
-            renderRack();
+        let inventoryData = pilotProducts.map(p => ({...p, quantity: 0, counted: false}));
+
+        function updateLocation() {
+            const product = pilotProducts[currentPosition];
+            document.getElementById('currentLocation').textContent = product.id;
+            document.getElementById('productName').textContent = `Caño ${product.name}`;
+            
+            const colorDiv = document.getElementById('productColor');
+            colorDiv.className = `product-color color-${product.color}`;
+            
+            const emoji = {
+                'white': '⚪',
+                'yellow': '🟡',
+                'red': '🔴',
+                'blue': '🔵'
+            }[product.color];
+            
+            colorDiv.textContent = `${emoji} ${product.colorName} - ${product.thickness}mm`;
+            
+            renderMap();
         }
 
-        function renderRack() {
+        function changePosition(delta) {
+            currentPosition = (currentPosition + delta + pilotProducts.length) % pilotProducts.length;
+            updateLocation();
+        }
+
+        function resetLocation() {
+            currentPosition = 0;
+            updateLocation();
+            showToast('Primera posición');
+        }
+
+        function goToMap() {
+            switchView('map');
+        }
+
+        function renderMap() {
             const grid = document.getElementById('rackGrid');
             grid.innerHTML = '';
             
-            rackData.forEach(cell => {
-                const cellDiv = document.createElement('div');
-                cellDiv.className = 'rack-cell';
+            inventoryData.forEach((item, idx) => {
+                const cell = document.createElement('div');
+                cell.className = 'rack-cell';
+                if (item.counted) cell.classList.add('occupied');
+                if (idx === currentPosition) cell.classList.add('selected');
                 
-                if (cell.occupied) cellDiv.classList.add('occupied');
-                if (cell.hasDiscrepancy) cellDiv.classList.add('discrepancy');
-                if (cell.isLowStock) cellDiv.classList.add('low-stock');
+                const emoji = {
+                    'white': '⚪',
+                    'yellow': '🟡',
+                    'red': '🔴',
+                    'blue': '🔵'
+                }[item.color];
                 
-                if (cell.id === `N${currentLevel}-${String(currentPosition).padStart(2, '0')}`) {
-                    cellDiv.classList.add('selected');
-                }
-                
-                cellDiv.innerHTML = `
-                    <div class="cell-id">${cell.id}</div>
-                    ${cell.occupied ? `<div class="cell-qty">${cell.quantity}un</div>` : ''}
+                cell.innerHTML = `
+                    <div class="cell-id">${item.id}</div>
+                    <div class="cell-product">${emoji} ${item.name}</div>
+                    ${item.counted ? `<div class="cell-qty">${item.quantity} unidades</div>` : '<div class="cell-qty" style="color: var(--text-muted);">Sin contar</div>'}
                 `;
                 
-                cellDiv.onclick = () => selectCellFromMap(cell);
-                grid.appendChild(cellDiv);
+                cell.onclick = () => {
+                    currentPosition = idx;
+                    updateLocation();
+                    switchView('camera');
+                };
+                
+                grid.appendChild(cell);
             });
-        }
-
-        function selectCellFromMap(cell) {
-            const parts = cell.id.split('-');
-            currentLevel = parseInt(parts[0].substring(1));
-            currentPosition = parseInt(parts[1]);
-            updateLocation();
-            renderRack();
-            switchView('camera');
-            showToast(`Seleccionado: ${cell.id}`);
-        }
-
-        function updateStats() {
-            const occupied = rackData.filter(c => c.occupied).length;
-            const discrepancies = rackData.filter(c => c.hasDiscrepancy).length;
-            
-            document.getElementById('statOccupancy').textContent = Math.round((occupied / 105) * 100) + '%';
-            document.getElementById('statPositions').textContent = `${occupied}/105`;
-            document.getElementById('statDiscrepancies').textContent = discrepancies;
         }
 
         function switchView(viewName) {
@@ -1013,40 +977,8 @@
             document.querySelector(`.tab-btn[onclick*="${viewName}"]`).classList.add('active');
             document.querySelector(`.bottom-nav-btn[onclick*="${viewName}"]`).classList.add('active');
             
-            if (viewName === 'map') {
-                renderRack();
-            }
-        }
-
-        function goToMap() {
-            switchView('map');
-        }
-
-        function updateLocation() {
-            document.getElementById('currentLocation').textContent = 
-                `N${currentLevel}-${String(currentPosition).padStart(2, '0')}`;
-        }
-
-        function changeLevel(delta) {
-            currentLevel = Math.max(1, Math.min(5, currentLevel + delta));
-            updateLocation();
-            renderRack();
-            showToast(`Nivel ${currentLevel}`);
-        }
-
-        function changePosition(delta) {
-            currentPosition = Math.max(1, Math.min(21, currentPosition + delta));
-            updateLocation();
-            renderRack();
-            showToast(`Columna ${currentPosition}`);
-        }
-
-        function resetLocation() {
-            currentLevel = 3;
-            currentPosition = 15;
-            updateLocation();
-            renderRack();
-            showToast('N3-15 (centro)');
+            if (viewName === 'map') renderMap();
+            if (viewName === 'export') loadActivity();
         }
 
         async function toggleCamera() {
@@ -1078,7 +1010,6 @@
                     showToast('✅ Cámara lista');
                 } catch (error) {
                     showToast('❌ Error: Permita acceso a cámara');
-                    console.error(error);
                 }
             } else {
                 stopCamera();
@@ -1123,6 +1054,8 @@
         }
 
         async function analyzeImage(imageData) {
+            const product = pilotProducts[currentPosition];
+            
             try {
                 const response = await fetch('https://api.anthropic.com/v1/messages', {
                     method: 'POST',
@@ -1145,12 +1078,19 @@
                                 },
                                 {
                                     type: 'text',
-                                    text: `Analiza esta imagen de caños estructurales apilados.
+                                    text: `Cuenta ÚNICAMENTE la cantidad de caños estructurales que ves en esta imagen.
 
-Responde SOLO con JSON válido (sin markdown, sin texto extra):
-{"count": número, "type": "medida", "confidence": porcentaje}
+Los caños están apilados horizontalmente (se ven las puntas circulares de frente).
 
-Cuenta los caños visibles y estima la medida si es posible.`
+IMPORTANTE:
+- SOLO cuenta cuántos caños ves
+- NO intentes identificar el tipo o medida
+- Cuenta todos los caños visibles, incluso parcialmente
+
+Responde SOLO con este formato JSON (sin markdown, sin texto extra):
+{"count": número_exacto_de_caños}
+
+Ejemplo: {"count": 42}`
                                 }
                             ]
                         }]
@@ -1162,31 +1102,27 @@ Cuenta los caños visibles y estima la medida si es posible.`
                 const cleanResponse = textResponse.replace(/```json|```/g, '').trim();
                 const result = JSON.parse(cleanResponse);
                 
-                displayResult(result);
+                displayResult(result.count || 0);
                 
             } catch (error) {
                 console.error('Error:', error);
-                displayResult({
-                    count: Math.floor(Math.random() * 40) + 20,
-                    type: '100x100x3mm',
-                    confidence: 85
-                });
+                displayResult(Math.floor(Math.random() * 40) + 20);
                 showToast('⚠️ Modo demo (error API)');
             }
             
             document.getElementById('loadingState').classList.remove('show');
         }
 
-        function displayResult(result) {
-            document.getElementById('resultCount').textContent = result.count;
-            document.getElementById('resultProduct').textContent = `Caños ${result.type}`;
-            document.getElementById('manualCount').value = result.count;
+        function displayResult(count) {
+            document.getElementById('resultCount').textContent = count;
+            document.getElementById('resultProduct').textContent = `Caños detectados`;
+            document.getElementById('manualCount').value = count;
             document.getElementById('analysisResult').classList.add('show');
         }
 
         function adjustCount(delta) {
             const input = document.getElementById('manualCount');
-            const newValue = Math.max(0, parseInt(input.value) + delta);
+            const newValue = Math.max(0, parseInt(input.value || 0) + delta);
             input.value = newValue;
             document.getElementById('resultCount').textContent = newValue;
         }
@@ -1197,42 +1133,57 @@ Cuenta los caños visibles y estima la medida si es posible.`
         }
 
         function confirmCount() {
-            const count = document.getElementById('manualCount').value;
-            const location = document.getElementById('currentLocation').textContent;
+            const count = parseInt(document.getElementById('manualCount').value || 0);
+            const product = pilotProducts[currentPosition];
             
-            const cell = rackData.find(c => c.id === location);
-            if (cell) {
-                cell.quantity = parseInt(count);
-                cell.occupied = count > 0;
+            inventoryData[currentPosition].quantity = count;
+            inventoryData[currentPosition].counted = true;
+            
+            addActivity(`${product.id} - ${product.name}: ${count} unidades`);
+            showToast(`✅ ${count} unidades registradas`);
+            
+            document.getElementById('analysisResult').classList.remove('show');
+            
+            if (currentPosition < pilotProducts.length - 1) {
+                setTimeout(() => changePosition(1), 800);
+            } else {
+                setTimeout(() => {
+                    showToast('🎉 ¡Piloto completado!');
+                    switchView('export');
+                }, 1000);
             }
-            
-            showToast(`✅ ${count} unidades en ${location}`);
-            addActivity(`Conteo: ${count} unidades en ${location}`);
-            updateStats();
-            
-            setTimeout(() => {
-                document.getElementById('analysisResult').classList.remove('show');
-                changePosition(1);
-            }, 1500);
         }
 
-        function simulateCount() {
-            const count = prompt('Ingrese cantidad de caños contados manualmente:');
-            if (count && !isNaN(count) && count > 0) {
-                displayResult({
-                    count: parseInt(count),
-                    type: '100x100x3mm (manual)',
-                    confidence: 100
-                });
-                switchView('camera');
+        let activityHistory = [];
+
+        function addActivity(desc) {
+            const timestamp = new Date().toLocaleTimeString('es-AR');
+            activityHistory.unshift({ desc, time: timestamp });
+            if (activityHistory.length > 50) activityHistory.pop();
+        }
+
+        function loadActivity() {
+            const log = document.getElementById('activityLog');
+            
+            if (activityHistory.length === 0) {
+                log.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">No hay registros aún</div>';
+                return;
             }
+            
+            log.innerHTML = activityHistory.map(act => `
+                <div class="activity-item">
+                    <div class="activity-code">CONTEO</div>
+                    <div class="activity-desc">${act.desc}</div>
+                    <div class="activity-time">${act.time}</div>
+                </div>
+            `).join('');
         }
 
         function exportData() {
-            let csv = 'Ubicación,Cantidad,Estado\n';
-            rackData.forEach(cell => {
-                if (cell.occupied) {
-                    csv += `${cell.id},${cell.quantity},${cell.hasDiscrepancy ? 'Discrepancia' : 'OK'}\n`;
+            let csv = 'Posición,Producto,Cantidad,Espesor,Color\n';
+            inventoryData.forEach(item => {
+                if (item.counted) {
+                    csv += `${item.id},${item.name},${item.quantity},${item.thickness}mm,${item.colorName}\n`;
                 }
             });
             
@@ -1240,40 +1191,10 @@ Cuenta los caños visibles y estima la medida si es posible.`
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `inventario-caneria-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `piloto-caneria-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             
             showToast('✅ Exportado a CSV');
-        }
-
-        function loadActivity() {
-            const activities = [
-                { code: 'C-001-100X100', desc: 'Entrada en N3-15', time: 'Hace 5 min' },
-                { code: 'C-002-80X80', desc: 'Salida desde N2-07', time: 'Hace 18 min' },
-                { code: 'C-003-120X80', desc: 'Conteo con cámara N4-12', time: 'Hace 35 min' },
-                { code: 'C-004-150X150', desc: 'Ajuste en N5-03', time: 'Hace 1h' }
-            ];
-            
-            const log = document.getElementById('activityLog');
-            log.innerHTML = activities.map(act => `
-                <div class="activity-item">
-                    <div class="activity-code">${act.code}</div>
-                    <div class="activity-desc">${act.desc}</div>
-                    <div class="activity-time">${act.time}</div>
-                </div>
-            `).join('');
-        }
-
-        function addActivity(desc) {
-            const log = document.getElementById('activityLog');
-            const item = document.createElement('div');
-            item.className = 'activity-item';
-            item.innerHTML = `
-                <div class="activity-code">CONTEO-${Date.now()}</div>
-                <div class="activity-desc">${desc}</div>
-                <div class="activity-time">Justo ahora</div>
-            `;
-            log.insertBefore(item, log.firstChild);
         }
 
         function showToast(message) {
@@ -1284,10 +1205,8 @@ Cuenta los caños visibles y estima la medida si es posible.`
         }
 
         window.onload = function() {
-            initializeRack();
-            loadActivity();
             updateLocation();
-            updateStats();
+            renderMap();
         };
     </script>
 </body>
